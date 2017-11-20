@@ -7,6 +7,8 @@
 #include "modelclass.h"
 #include "colorshaderclass.h"
 
+#include "textureshaderclass.h"
+
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 const float SCREEN_DEPTH = 1000.0f;
@@ -22,8 +24,13 @@ public:
 	bool Initialize(int, int, HWND);
 	void Shutdown();
 	bool Frame();
+	void CreateNewHair();
 
+	float x = 0;
+	float y = 0;
 	float z = -10;
+	int instances = 100;
+	int sections = 10;
 	CameraClass* m_Camera;
 
 private:
@@ -33,7 +40,8 @@ private:
 
 	D3DClass* m_D3D;
 	ModelClass* m_Model;
-	ColorShaderClass* m_ColorShader;
+
+	TextureShaderClass* m_TextureShader;
 };
 
 #endif

@@ -134,15 +134,55 @@ bool SystemClass::Frame()
 	//move camera
 	if (m_Input->IsKeyDown(VK_LEFT))
 	{
-		m_Graphics->z -= 0.1f;
-		m_Graphics->m_Camera->SetPosition(0.0f, 0.0f, m_Graphics->z);
+		m_Graphics->x -= 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 	}
 
 	//move camera
 	if (m_Input->IsKeyDown(VK_RIGHT))
 	{
-		m_Graphics->z += 0.1f;
-		m_Graphics->m_Camera->SetPosition(0.0f, 0.0f, m_Graphics->z);
+		m_Graphics->x += 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(VK_DOWN) && m_Graphics->sections > 2)
+	{
+		//m_Graphics->y -= 0.1f;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->sections-= 2;
+		m_Graphics->CreateNewHair();
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(VK_UP))
+	{
+		//m_Graphics->y += 0.1f;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->sections+= 2;
+		m_Graphics->CreateNewHair();
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(VK_OEM_PLUS))
+	{
+		//m_Graphics->z -= 1;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->instances++;
+		m_Graphics->CreateNewHair();
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(VK_OEM_MINUS) && m_Graphics->instances > 1)
+	{
+		//m_Graphics->z += 1;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->instances--;
+		m_Graphics->CreateNewHair();
+	}
+
+	if (m_Input->IsKeyDown(VK_RETURN)) {
+		m_Graphics->CreateNewHair();
 	}
 
 	// Do the frame processing for the graphics object.
@@ -199,7 +239,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	m_hinstance = GetModuleHandle(NULL);
 
 	// Give the application a name.
-	m_applicationName = L"Engine";
+	m_applicationName = L"Hair";
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
