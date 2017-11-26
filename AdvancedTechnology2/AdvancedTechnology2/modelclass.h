@@ -27,12 +27,15 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
+	void Update(float windValue, ID3D11Device* device);
+	bool generateData(ID3D11Device*, int vertexCount, int instances);
+
 	int GetVertexCount();
 	int GetInstanceCount();
 	ID3D11ShaderResourceView* GetTexture();
 
 private:
-	bool InitializeBuffers(ID3D11Device*, int vertexCount, int instances);
+	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 
@@ -43,6 +46,9 @@ private:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer, *m_instanceBuffer;
 	int m_vertexCount, m_indexCount, m_instanceCount;
 	TextureClass* m_Texture;
+
+	VertexType* vertices;
+	InstanceType* instances;
 };
 
 #endif

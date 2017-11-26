@@ -25,7 +25,13 @@ bool ModelClass::Initialize(ID3D11Device* device, WCHAR* textureFilename, int ve
 
 
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
-	result = InitializeBuffers(device, vertexCount, instances);
+	result = generateData(device, vertexCount, instances);
+	if (!result)
+	{
+		return false;
+	}
+
+	result = InitializeBuffers(device);
 	if (!result)
 	{
 		return false;
@@ -49,6 +55,14 @@ void ModelClass::Shutdown()
 
 	// Release the vertex and index buffers.
 	ShutdownBuffers();
+
+	// Release the instance array now that the instance buffer has been created and loaded.
+	delete[] instances;
+	instances = 0;
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete[] vertices;
+	vertices = 0;
 
 	return;
 }
@@ -77,16 +91,46 @@ ID3D11ShaderResourceView* ModelClass::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-bool ModelClass::InitializeBuffers(ID3D11Device* device, int vertexCount, int instanceCount)
+void ModelClass::Update(float windValue, ID3D11Device* device)
 {
-	VertexType* vertices;
-	InstanceType* instances;
-	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, instanceData;
-	HRESULT result;
+	ShutdownBuffers();
 
+	float length = 0.1;
+	float gravity = 0.98;
+	float rigidity = 0.4;
 
-	srand((unsigned)time(NULL));
+	for (int a = 0; a < m_vertexCount; a += 2) {
+		if (a <= 0) {
+			vertices[a].position = D3DXVECTOR3(0, 0, 0);
+			vertices[a].position += D3DXVECTOR3((rand() % 100) / 100, (rand() % 100) / 100, (rand() % 100) / 100);
+			vertices[a].texture = D3DXVECTOR2(0, 0);
+		}
+		else {
+			vertices[a].position = vertices[a - 1].position;
+			vertices[a].texture = vertices[a - 1].texture;
+		}
+		vertices[a + 1].texture = D3DXVECTOR2(1, 1);
+		//length affected by gravity
+		D3DXVECTOR3 L1 = D3DXVECTOR3(1, gravity, 0);
+		//rigidity Effect
+		float currentA = (a + 1);
+		float current = (currentA / m_vertexCount);
+		float effect = (rigidity * (1 - current));
+		L1.x *= (effect * windValue) + length;
+		L1.y *= effect - rigidity;
+		L1.x *= windValue;
+		if (windValue < 0) {
+			L1.x *= -1;
+		}
+		D3DXVec3Normalize(&L1, &L1);
+		L1 *= length;
+		vertices[a + 1].position = vertices[a].position + L1;
+	}
+
+	InitializeBuffers(device);
+}
+
+bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount) {
 
 	// Set the number of vertices in the vertex array.
 	m_vertexCount = vertexCount;
@@ -109,21 +153,21 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device, int vertexCount, int in
 		return false;
 	}
 
-
 	float length = 0.1;
 	float gravity = 0.98;
 	float rigidity = 0.4;
 
-	for (int a = 0; a < m_vertexCount; a+= 2) {
+	for (int a = 0; a < m_vertexCount; a += 2) {
 		if (a <= 0) {
 			vertices[a].position = D3DXVECTOR3(0, 0, 0);
+			vertices[a].position += D3DXVECTOR3((rand() % 10)/10, (rand() % 10) / 10, (rand() % 10) / 10);
 			vertices[a].texture = D3DXVECTOR2(0, 0);
 		}
 		else {
 			vertices[a].position = vertices[a - 1].position;
 			vertices[a].texture = vertices[a - 1].texture;
 		}
-		vertices[a+1].texture = D3DXVECTOR2(1,1);
+		vertices[a + 1].texture = D3DXVECTOR2(1, 1);
 		//length affected by gravity
 		D3DXVECTOR3 L1 = D3DXVECTOR3(length, gravity, 0);
 		//rigidity Effect
@@ -131,25 +175,63 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device, int vertexCount, int in
 		float current = (currentA / m_vertexCount);
 		float effect = (rigidity * (1 - current));
 		L1.y *= effect - rigidity;
+		D3DXVec3Normalize(&L1, &L1);
+		L1 *= length;
 		vertices[a + 1].position = vertices[a].position + L1;
 	}
 
 	float b = 1, c = 1, e = 1;
 	for (int a = 0; a < m_instanceCount; a++) {
-		if (b > 100 - c * c) {
+		if (b > 100) {
 			b = 1;
 			c++;
 		}
-		if (c > 100 - e * e) {
+		if (c > 100 ) {
 			c = 1;
 			e++;
 		}
 		if (e > 100) {
 			e = 1;
 		}
-		instances[a].position = D3DXVECTOR3(b/10, c/10, e/10) + D3DXVECTOR3((rand() % 10) / 100, (rand() % 10) / 100, (rand() % 10) / 100);
+		instances[a].position = D3DXVECTOR3(b / 10, c / 10, e / 10) + D3DXVECTOR3((rand() % 10) / 100, (rand() % 10) / 100, (rand() % 10) / 100);
 		b++;
 	}
+
+	return true;
+}
+
+bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+{
+	bool result;
+
+
+	// Create the texture object.
+	m_Texture = new TextureClass;
+	if (!m_Texture)
+	{
+		return false;
+	}
+
+	// Initialize the texture object.
+	result = m_Texture->Initialize(device, filename);
+	if (!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool ModelClass::InitializeBuffers(ID3D11Device* device)
+{
+
+	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, instanceData;
+	HRESULT result;
+
+
+	srand((unsigned)time(NULL));
+
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -190,17 +272,6 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device, int vertexCount, int in
 	{
 		return false;
 	}
-
-	// Release the instance array now that the instance buffer has been created and loaded.
-	delete[] instances;
-	instances = 0;
-
-	// Release the arrays now that the vertex and index buffers have been created and loaded.
-	delete[] vertices;
-	vertices = 0;
-
-	delete[] instances;
-	instances = 0;
 
 	return true;
 }
@@ -251,28 +322,6 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	//D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 
 	return;
-}
-
-bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
-{
-	bool result;
-
-
-	// Create the texture object.
-	m_Texture = new TextureClass;
-	if (!m_Texture)
-	{
-		return false;
-	}
-
-	// Initialize the texture object.
-	result = m_Texture->Initialize(device, filename);
-	if (!result)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 void ModelClass::ReleaseTexture()

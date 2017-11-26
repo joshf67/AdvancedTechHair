@@ -158,6 +158,7 @@ bool GraphicsClass::Render()
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model->Update(wind, m_D3D->GetDevice());
 	m_Model->Render(m_D3D->GetDeviceContext());
 
 	// Render the model using the texture shader.

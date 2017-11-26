@@ -124,7 +124,6 @@ bool SystemClass::Frame()
 {
 	bool result;
 
-
 	// Check if the user pressed escape and wants to exit the application.
 	if (m_Input->IsKeyDown(VK_ESCAPE))
 	{
@@ -134,12 +133,28 @@ bool SystemClass::Frame()
 	//move camera
 	if (m_Input->IsKeyDown(VK_LEFT))
 	{
+		//m_Graphics->x -= 0.1f;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->wind -= 0.1f;
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(VK_RIGHT))
+	{
+		//m_Graphics->x += 0.1f;
+		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->wind += 0.1f;
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(65))
+	{
 		m_Graphics->x -= 0.1f;
 		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 	}
 
 	//move camera
-	if (m_Input->IsKeyDown(VK_RIGHT))
+	if (m_Input->IsKeyDown(68))
 	{
 		m_Graphics->x += 0.1f;
 		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);

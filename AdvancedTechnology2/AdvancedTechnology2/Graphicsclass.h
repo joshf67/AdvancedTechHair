@@ -32,6 +32,8 @@ public:
 	int instances = 100;
 	int sections = 10;
 	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	float wind = 0;
 
 private:
 	bool Render();
@@ -39,7 +41,6 @@ private:
 private:
 
 	D3DClass* m_D3D;
-	ModelClass* m_Model;
 
 	TextureShaderClass* m_TextureShader;
 };
