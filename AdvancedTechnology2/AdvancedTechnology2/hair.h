@@ -9,15 +9,16 @@
 class Hair {
 
 public:
-	Hair(D3DXVECTOR3 position, float length, float sections, bool gravityAffected = false, float rigidity = 0);
-	bool Initialize(ID3D11Device* device);
-	void Render();
+	
+	Hair(D3DXVECTOR3 position, float length, float sections, float _gravity = 0, float rigidity = 0);
+	Hair(D3DXVECTOR3 _position, float _sections, Hair* hair1, Hair* hair2);
+	bool Update(float windValue);
 
-private:
-	D3DXVECTOR3 position;
+	D3DXVECTOR3 startPosition;
+	D3DXVECTOR3* positions;
 	float length;
 	float sections;
-	bool gravityAffected;
+	float gravity;
 	float rigidity;
 };
 

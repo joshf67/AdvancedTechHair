@@ -64,6 +64,9 @@ void ModelClass::Shutdown()
 	delete[] vertices;
 	vertices = 0;
 
+	delete hair1;
+	delete hair2;
+
 	return;
 }
 
@@ -95,36 +98,27 @@ void ModelClass::Update(float windValue, ID3D11Device* device)
 {
 	ShutdownBuffers();
 
-	float length = 0.1;
-	float gravity = 0.98;
-	float rigidity = 0.4;
+	hair1->Update(windValue);
+	hair2->Update(windValue);
 
-	for (int a = 0; a < m_vertexCount; a += 2) {
-		if (a <= 0) {
-			vertices[a].position = D3DXVECTOR3(0, 0, 0);
-			vertices[a].position += D3DXVECTOR3((rand() % 100) / 100, (rand() % 100) / 100, (rand() % 100) / 100);
-			vertices[a].texture = D3DXVECTOR2(0, 0);
+	D3DXVECTOR3 direction = (hair1->startPosition - hair2->startPosition);
+	D3DXVECTOR3 length = direction / m_instanceCount;
+
+	if (hair1->sections > 0) {
+		for (int a = 0; a < m_vertexCount; a += 2) {
+			if (a == 0) {
+				vertices[0].position = hair1->positions[0];
+				vertices[1].position = hair1->positions[1];
+			}
+			else {
+				vertices[a].position = hair1->positions[a - 1];
+				vertices[a + 1].position = hair1->positions[a + 1];
+			}
 		}
-		else {
-			vertices[a].position = vertices[a - 1].position;
-			vertices[a].texture = vertices[a - 1].texture;
+
+		for (int a = 0; a < m_instanceCount; a++) {
+			instances[a].position = hair1->startPosition + (length * a);
 		}
-		vertices[a + 1].texture = D3DXVECTOR2(1, 1);
-		//length affected by gravity
-		D3DXVECTOR3 L1 = D3DXVECTOR3(1, gravity, 0);
-		//rigidity Effect
-		float currentA = (a + 1);
-		float current = (currentA / m_vertexCount);
-		float effect = (rigidity * (1 - current));
-		L1.x *= (effect * windValue) + length;
-		L1.y *= effect - rigidity;
-		L1.x *= windValue;
-		if (windValue < 0) {
-			L1.x *= -1;
-		}
-		D3DXVec3Normalize(&L1, &L1);
-		L1 *= length;
-		vertices[a + 1].position = vertices[a].position + L1;
 	}
 
 	InitializeBuffers(device);
@@ -153,48 +147,14 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 		return false;
 	}
 
-	float length = 0.1;
-	float gravity = 0.98;
-	float rigidity = 0.4;
+	hair1 = new Hair(D3DXVECTOR3(0, 0, 0), 0.1f, vertexCount, 0.98, 0);
+	hair2 = new Hair(D3DXVECTOR3(4, 0, 0), 0.4f, vertexCount, 0.98, 0);
 
-	for (int a = 0; a < m_vertexCount; a += 2) {
-		if (a <= 0) {
-			vertices[a].position = D3DXVECTOR3(0, 0, 0);
-			vertices[a].position += D3DXVECTOR3((rand() % 10)/10, (rand() % 10) / 10, (rand() % 10) / 10);
-			vertices[a].texture = D3DXVECTOR2(0, 0);
-		}
-		else {
-			vertices[a].position = vertices[a - 1].position;
-			vertices[a].texture = vertices[a - 1].texture;
-		}
-		vertices[a + 1].texture = D3DXVECTOR2(1, 1);
-		//length affected by gravity
-		D3DXVECTOR3 L1 = D3DXVECTOR3(length, gravity, 0);
-		//rigidity Effect
-		float currentA = (a + 1);
-		float current = (currentA / m_vertexCount);
-		float effect = (rigidity * (1 - current));
-		L1.y *= effect - rigidity;
-		D3DXVec3Normalize(&L1, &L1);
-		L1 *= length;
-		vertices[a + 1].position = vertices[a].position + L1;
-	}
+	D3DXVECTOR3 direction = (hair1->startPosition - hair2->startPosition);
+	D3DXVECTOR3 length = direction / instanceCount;
 
-	float b = 1, c = 1, e = 1;
-	for (int a = 0; a < m_instanceCount; a++) {
-		if (b > 100) {
-			b = 1;
-			c++;
-		}
-		if (c > 100 ) {
-			c = 1;
-			e++;
-		}
-		if (e > 100) {
-			e = 1;
-		}
-		instances[a].position = D3DXVECTOR3(b / 10, c / 10, e / 10) + D3DXVECTOR3((rand() % 10) / 100, (rand() % 10) / 100, (rand() % 10) / 100);
-		b++;
+	for (int a = 0; a < instanceCount; a++) {
+		instances[a].position = hair1->startPosition + (length * a);
 	}
 
 	return true;

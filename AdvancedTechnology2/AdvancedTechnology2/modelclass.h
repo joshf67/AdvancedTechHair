@@ -5,6 +5,7 @@
 #include <d3d11.h>
 #include <d3dx10math.h>
 #include "textureclass.h"
+#include "hair.h"
 
 class ModelClass
 {
@@ -49,6 +50,7 @@ private:
 
 	VertexType* vertices;
 	InstanceType* instances;
+	Hair *hair1, *hair2;
 };
 
 #endif
