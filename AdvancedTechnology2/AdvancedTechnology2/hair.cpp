@@ -10,7 +10,6 @@ Hair::Hair(D3DXVECTOR3 _position, float _length, float _sections, float _gravity
 	rigidity = _rigidity;
 
 	Update(0);
-
 }
 
 Hair::Hair(D3DXVECTOR3 _position, float _sections, Hair* hair1, Hair* hair2) {
@@ -25,7 +24,6 @@ Hair::Hair(D3DXVECTOR3 _position, float _sections, Hair* hair1, Hair* hair2) {
 }
 
 bool Hair::Update(float windValue) {
-	
 	for (int a = 0; a < sections; a++) {
 		D3DXVECTOR3 position(0, 0, 0);
 		D3DXVECTOR3 effect(0, 0, 0);
@@ -47,6 +45,5 @@ bool Hair::Update(float windValue) {
 		}
 		positions[a] = position;
 	}
-
 	return true;
 }
