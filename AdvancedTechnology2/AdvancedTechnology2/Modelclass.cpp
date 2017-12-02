@@ -94,12 +94,12 @@ ID3D11ShaderResourceView* ModelClass::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-void ModelClass::Update(float windValue)
+void ModelClass::Update(float windValue, ID3D11Device* device)
 {
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//D3D11_MAPPED_SUBRESOURCE mappedResource;
+	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-
+	ShutdownBuffers();
 
 	hair1->Update(windValue);
 
@@ -120,6 +120,8 @@ void ModelClass::Update(float windValue)
 			instances[a].position = hair1->instancePositions[a];
 		}
 	}
+
+	InitializeBuffers(device);
 }
 
 bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount) {
@@ -147,7 +149,7 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 
 	hair1 = new Hair(D3DXVECTOR3(0, 0, 100), 0.1f, vertexCount, instanceCount, 0.98f, 10);
 	hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
-	Update(0);
+	Update(0, device);
 
 	for (int a = 0; a < instanceCount; a++) {
 		instances[a].position = hair1->instancePositions[a];

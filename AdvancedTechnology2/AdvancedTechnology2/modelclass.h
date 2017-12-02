@@ -29,7 +29,7 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
-	void Update(float windValue);
+	void Update(float windValue, ID3D11Device* device);
 	bool generateData(ID3D11Device*, int vertexCount, int instances);
 
 	int GetVertexCount();
