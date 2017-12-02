@@ -64,8 +64,8 @@ void ModelClass::Shutdown()
 	delete[] vertices;
 	vertices = 0;
 
+	hair1->Shutdown();
 	delete hair1;
-	delete hair2;
 
 	return;
 }
@@ -94,15 +94,14 @@ ID3D11ShaderResourceView* ModelClass::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-void ModelClass::Update(float windValue, ID3D11Device* device)
+void ModelClass::Update(float windValue)
 {
-	ShutdownBuffers();
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+
 
 	hair1->Update(windValue);
-	hair2->Update(windValue);
-
-	D3DXVECTOR3 direction = (hair1->startPosition - hair2->startPosition);
-	D3DXVECTOR3 length = direction / m_instanceCount;
 
 	if (hair1->sections > 0) {
 		for (int a = 0; a < m_vertexCount; a += 2) {
@@ -116,12 +115,11 @@ void ModelClass::Update(float windValue, ID3D11Device* device)
 			}
 		}
 
+		hair1->UpdateInstances();
 		for (int a = 0; a < m_instanceCount; a++) {
-			instances[a].position = hair1->startPosition + (length * a);
+			instances[a].position = hair1->instancePositions[a];
 		}
 	}
-
-	InitializeBuffers(device);
 }
 
 bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount) {
@@ -147,14 +145,13 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 		return false;
 	}
 
-	hair1 = new Hair(D3DXVECTOR3(0, 0, 0), 0.1f, vertexCount, 0.98, 0);
-	hair2 = new Hair(D3DXVECTOR3(4, 0, 0), 0.4f, vertexCount, 0.98, 0);
-
-	D3DXVECTOR3 direction = (hair1->startPosition - hair2->startPosition);
-	D3DXVECTOR3 length = direction / instanceCount;
+	hair1 = new Hair(D3DXVECTOR3(0, 0, 100), 0.1f, vertexCount, instanceCount, 0.98f, 10);
+	hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
+	Update(0);
 
 	for (int a = 0; a < instanceCount; a++) {
-		instances[a].position = hair1->startPosition + (length * a);
+		instances[a].position = hair1->instancePositions[a];
+		instances[a].texture = D3DXVECTOR2(0, rand() % 100);
 	}
 
 	return true;
@@ -194,10 +191,10 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 
 	// Set up the description of the static vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
@@ -214,10 +211,10 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// Set up the description of the instance buffer.
-	instanceBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
 	instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	instanceBufferDesc.CPUAccessFlags = 0;
+	instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	instanceBufferDesc.MiscFlags = 0;
 	instanceBufferDesc.StructureByteStride = 0;
 

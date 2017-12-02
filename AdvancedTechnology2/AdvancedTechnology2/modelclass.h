@@ -12,6 +12,7 @@ class ModelClass
 private:
 	struct InstanceType {
 		D3DXVECTOR3 position;
+		D3DXVECTOR2 texture;
 	};
 	struct VertexType
 	{
@@ -28,7 +29,7 @@ public:
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
-	void Update(float windValue, ID3D11Device* device);
+	void Update(float windValue);
 	bool generateData(ID3D11Device*, int vertexCount, int instances);
 
 	int GetVertexCount();
@@ -50,7 +51,7 @@ private:
 
 	VertexType* vertices;
 	InstanceType* instances;
-	Hair *hair1, *hair2;
+	Hair *hair1;
 };
 
 #endif

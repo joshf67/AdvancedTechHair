@@ -29,7 +29,7 @@ public:
 	float x = 0;
 	float y = 0;
 	float z = -10;
-	int instances = 100;
+	int instances = 10000;
 	int sections = 10;
 	CameraClass* m_Camera;
 	ModelClass* m_Model;

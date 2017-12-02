@@ -96,7 +96,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Untitled">
+    <Image Include="Blue">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="hairColour">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

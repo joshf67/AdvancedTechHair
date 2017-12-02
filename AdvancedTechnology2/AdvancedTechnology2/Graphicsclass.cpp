@@ -56,7 +56,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/Untitled", 10, 1000);
+	result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", 10, instances);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -138,7 +138,7 @@ void GraphicsClass::CreateNewHair() {
 	m_Model->Shutdown();
 	delete m_Model;
 	m_Model = new ModelClass;
-	m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/Untitled", sections, instances);
+	m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances);
 }
 
 bool GraphicsClass::Render()
@@ -158,7 +158,15 @@ bool GraphicsClass::Render()
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_Model->Update(wind, m_D3D->GetDevice());
+	m_Model->Update(wind);
+	if (wind != 0) {
+		if (wind > 0) {
+			//wind -= 0.5f;
+		}
+		else {
+			//wind += 0.5f;
+		}
+	}
 	m_Model->Render(m_D3D->GetDeviceContext());
 
 	// Render the model using the texture shader.

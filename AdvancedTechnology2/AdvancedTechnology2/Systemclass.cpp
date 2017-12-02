@@ -1,5 +1,6 @@
 #pragma once
 #include "systemclass.h"
+//#include <assimp\>
 
 SystemClass::SystemClass()
 {
@@ -20,7 +21,6 @@ bool SystemClass::Initialize()
 {
 	int screenWidth, screenHeight;
 	bool result;
-
 
 	// Initialize the width and height of the screen to zero before sending the variables into the function.
 	screenWidth = 0;
@@ -135,7 +135,7 @@ bool SystemClass::Frame()
 	{
 		//m_Graphics->x -= 0.1f;
 		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
-		m_Graphics->wind -= 0.1f;
+		m_Graphics->wind -= 1;
 	}
 
 	//move camera
@@ -143,7 +143,7 @@ bool SystemClass::Frame()
 	{
 		//m_Graphics->x += 0.1f;
 		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
-		m_Graphics->wind += 0.1f;
+		m_Graphics->wind += 1;
 	}
 
 	//move camera
@@ -183,16 +183,16 @@ bool SystemClass::Frame()
 	{
 		//m_Graphics->z -= 1;
 		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
-		m_Graphics->instances++;
+		m_Graphics->instances += 10;
 		m_Graphics->CreateNewHair();
 	}
 
 	//move camera
-	if (m_Input->IsKeyDown(VK_OEM_MINUS) && m_Graphics->instances > 1)
+	if (m_Input->IsKeyDown(VK_OEM_MINUS) && m_Graphics->instances > 10)
 	{
 		//m_Graphics->z += 1;
 		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
-		m_Graphics->instances--;
+		m_Graphics->instances -= 10;
 		m_Graphics->CreateNewHair();
 	}
 

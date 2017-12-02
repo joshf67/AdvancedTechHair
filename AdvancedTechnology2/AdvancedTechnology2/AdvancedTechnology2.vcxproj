@@ -72,8 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\Documents\Visual Studio 2017\Projects\AdvancedTechnology2\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Documents\Visual Studio 2017\Projects\AdvancedTechnology2\Lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\Documents\Visual Studio 2017\Projects\AdvancedTechHair\AdvancedTechnology2\Assimp\include;D:\Documents\Visual Studio 2017\Projects\AdvancedTechnology2\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\Documents\Visual Studio 2017\Projects\AdvancedTechHair\AdvancedTechnology2\Assimp\lib\x64;D:\Documents\Visual Studio 2017\Projects\AdvancedTechnology2\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -172,9 +172,10 @@
     <None Include="Texture.vs" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Untitled">
+    <Image Include="Blue">
       <FileType>Document</FileType>
     </Image>
+    <Image Include="hairColour" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

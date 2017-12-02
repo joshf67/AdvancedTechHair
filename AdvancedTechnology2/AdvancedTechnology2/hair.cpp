@@ -1,8 +1,14 @@
 #pragma once
 #include "hair.h"
 
-Hair::Hair(D3DXVECTOR3 _position, float _length, float _sections, float _gravity, float _rigidity) {
+void Hair::Shutdown() {
+	releaseHair();
+	releaseInstances();
+}
+
+Hair::Hair(D3DXVECTOR3 _position, float _length, float _sections, float _instances, float _gravity, float _rigidity) {
 	startPosition = _position;
+	instances = _instances;
 	length = _length;
 	sections = _sections;
 	positions = new D3DXVECTOR3[sections];
@@ -30,10 +36,10 @@ bool Hair::Update(float windValue) {
 		effect.x = length;
 		effect.x += windValue;
 		if (rigidity != 0) {
-			effect.y = gravity * (1 - (100 / rigidity)) * a;
+			effect.y = -gravity * (1 - (rigidity / 100)) * a;
 		}
 		else {
-			effect.y = gravity * a;
+			effect.y = -gravity * a;
 		}
 		D3DXVec3Normalize(&effect, &effect);
 		effect *= length;
@@ -46,4 +52,35 @@ bool Hair::Update(float windValue) {
 		positions[a] = position;
 	}
 	return true;
+}
+
+void Hair::InitiateInstances(D3DXVECTOR3 _positionMaxOffset) {
+	instancePositions = new D3DXVECTOR3[instances];
+	instanceOffset = new D3DXVECTOR3[instances];
+	int xVal = (_positionMaxOffset.x * 10);
+	int yVal = (_positionMaxOffset.y * 10);
+	int zVal = (_positionMaxOffset.z * 10);
+	int xValMult = (_positionMaxOffset.x * 10) * 2;
+	int yValMult = (_positionMaxOffset.y * 10) * 2;
+	int zValMult = (_positionMaxOffset.z * 10) * 2;
+	for (int a = 0; a < instances; a++) {
+		//instanceOffset[a] = D3DXVECTOR3((((rand() % xValMult) - xVal) / 10), (((rand() % yValMult) - yVal) / 10), (((rand() % zValMult) - zVal) / 10));
+		instanceOffset[a] = D3DXVECTOR3((((rand() % xValMult) - xVal) / 10), (((rand() % yValMult) - yVal) / 10), 0);
+	}
+	UpdateInstances();
+}
+
+void Hair::UpdateInstances() {
+	for (int a = 0; a < instances; a++) {
+		instancePositions[a] = positions[0] + instanceOffset[a];
+	}
+}
+
+void Hair::releaseHair() {
+	delete[] positions;
+}
+
+void Hair::releaseInstances() {
+	delete[] instanceOffset;
+	delete[] instancePositions;
 }
