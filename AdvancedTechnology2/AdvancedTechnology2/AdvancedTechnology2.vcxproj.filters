@@ -94,12 +94,15 @@
     <None Include="Texture.ps">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="testBear.FBX">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Blue">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="hairColour">
+    <Image Include="hairColour.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

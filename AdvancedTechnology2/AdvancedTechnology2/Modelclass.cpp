@@ -7,6 +7,8 @@ ModelClass::ModelClass()
 	m_indexBuffer = 0;
 	m_Texture = 0;
 	m_instanceBuffer = 0;
+	m_colour = 0;
+	indices = 0;
 }
 
 
@@ -63,6 +65,13 @@ void ModelClass::Shutdown()
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;
 	vertices = 0;
+	
+	// Release indices
+	delete[] indices;
+	indices = 0;
+
+	delete[] verticesColor;
+	verticesColor = 0;
 
 	hair1->Shutdown();
 	delete hair1;
@@ -73,7 +82,8 @@ void ModelClass::Shutdown()
 void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	RenderBuffers(deviceContext);
+	//RenderTexture(deviceContext);
+	RenderColor(deviceContext);
 
 	return;
 }
@@ -87,6 +97,11 @@ int ModelClass::GetVertexCount()
 int ModelClass::GetInstanceCount()
 {
 	return m_instanceCount;
+}
+
+int ModelClass::GetIndexCount()
+{
+	return m_indexCount;
 }
 
 ID3D11ShaderResourceView* ModelClass::GetTexture()
@@ -106,12 +121,12 @@ void ModelClass::Update(float windValue, ID3D11Device* device)
 	if (hair1->sections > 0) {
 		for (int a = 0; a < m_vertexCount; a += 2) {
 			if (a == 0) {
-				vertices[0].position = hair1->positions[0];
-				vertices[1].position = hair1->positions[1];
+				verticesColor[0].position = hair1->positions[0];
+				verticesColor[1].position = hair1->positions[1];
 			}
 			else {
-				vertices[a].position = hair1->positions[a - 1];
-				vertices[a + 1].position = hair1->positions[a + 1];
+				verticesColor[a].position = hair1->positions[a - 1];
+				verticesColor[a + 1].position = hair1->positions[a + 1];
 			}
 		}
 
@@ -134,8 +149,8 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 	m_instanceCount = instanceCount;
 
 	// Create the vertex array.
-	vertices = new VertexType[m_vertexCount];
-	if (!vertices)
+	verticesColor = new VertexTypeColor[m_vertexCount];
+	if (!verticesColor)
 	{
 		return false;
 	}
@@ -151,12 +166,40 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 	hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
 	Update(0, device);
 
-	for (int a = 0; a < instanceCount; a++) {
-		instances[a].position = hair1->instancePositions[a];
-		instances[a].texture = D3DXVECTOR2(0, rand() % 100);
+	D3DXVECTOR4 baseColour = D3DXVECTOR4(0.5f,0.5f,0.2f, 1);
+	D3DXVECTOR4 randColour;
+	randColour = D3DXVECTOR4(randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), 0); //<------- Doesn't add colors???
+	randColour = D3DXVECTOR4(0.5f, 0.5f, 0.2f, 1);
+	for (int a = 0; a < m_vertexCount; a += 2) {
+		verticesColor[a].colour = baseColour + randColour;
+		verticesColor[a + 1].colour = baseColour + randColour;
 	}
 
+	for (int a = 0; a < instanceCount; a++) {
+		randColour = D3DXVECTOR4(randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), 0);
+		randColour = D3DXVECTOR4(0.5f, 0.5f, 0.2f, 1);
+		instances[a].colour = baseColour + randColour;
+		instances[a].position = hair1->instancePositions[a];
+	}
+
+	m_indexCount = (m_vertexCount - 1) * 2;
+	indices = new unsigned int[m_indexCount];
+	if (!indices)
+	{
+		return false;
+	}
+
+	for (int a = 0; a < m_indexCount; a += 2) {
+		indices[a] = a;
+		indices[a + 1] = a + 1;
+	}
+
+
 	return true;
+}
+
+float ModelClass::randFloat(float a, float b) {
+	return ((b - a) *  ((float)rand() / RAND_MAX)) + a;
 }
 
 bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
@@ -184,8 +227,8 @@ bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
 
-	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, instanceData;
+	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, instanceData, indexData;
 	HRESULT result;
 
 
@@ -194,14 +237,23 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+	if (vertices) {
+		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
+		vertexData.pSysMem = vertices;
+	}
+	else if (verticesColor) {
+		vertexBufferDesc.ByteWidth = sizeof(VertexTypeColor) * m_vertexCount;
+		vertexData.pSysMem = verticesColor;
+	}
+	else {
+		return false;
+	}
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = vertices;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
@@ -212,21 +264,43 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 		return false;
 	}
 
-	// Set up the description of the instance buffer.
-	instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
-	instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	instanceBufferDesc.MiscFlags = 0;
-	instanceBufferDesc.StructureByteStride = 0;
+	if (m_instanceCount != 0) {
+		// Set up the description of the instance buffer.
+		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
+		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		instanceBufferDesc.MiscFlags = 0;
+		instanceBufferDesc.StructureByteStride = 0;
 
-	// Give the subresource structure a pointer to the instance data.
-	instanceData.pSysMem = instances;
-	instanceData.SysMemPitch = 0;
-	instanceData.SysMemSlicePitch = 0;
+		// Give the subresource structure a pointer to the instance data.
+		instanceData.pSysMem = instances;
+		instanceData.SysMemPitch = 0;
+		instanceData.SysMemSlicePitch = 0;
 
-	// Create the instance buffer.
-	result = device->CreateBuffer(&instanceBufferDesc, &instanceData, &m_instanceBuffer);
+		// Create the instance buffer.
+		result = device->CreateBuffer(&instanceBufferDesc, &instanceData, &m_instanceBuffer);
+		if (FAILED(result))
+		{
+			return false;
+		}
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(unsigned long) * m_indexCount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 	if (FAILED(result))
 	{
 		return false;
@@ -251,10 +325,17 @@ void ModelClass::ShutdownBuffers()
 		m_vertexBuffer = 0;
 	}
 
+	// Release the vertex buffer.
+	if (m_indexBuffer)
+	{
+		m_indexBuffer->Release();
+		m_indexBuffer = 0;
+	}
+
 	return;
 }
 
-void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
+void ModelClass::RenderTexture(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int strides[2];
 	unsigned int offsets[2];
@@ -278,7 +359,54 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	//D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST
+	//deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	return;
+}
+
+void ModelClass::RenderColor(ID3D11DeviceContext* deviceContext)
+{
+
+	/*
+	unsigned int stride;
+	unsigned int offset;
+
+	// Set vertex buffer stride and offset.
+	stride = sizeof(VertexTypeColor);
+	offset = 0;
+
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+
+	// Set the index buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+	*/
+
+	unsigned int strides[2];
+	unsigned int offsets[2];
+	ID3D11Buffer* bufferPointers[2];
+
+
+	// Set the buffer strides.
+	strides[0] = sizeof(VertexTypeColor);
+	strides[1] = sizeof(InstanceType);
+
+	// Set the buffer offsets.
+	offsets[0] = 0;
+	offsets[1] = 0;
+
+	// Set the array of pointers to the vertex and instance buffers.
+	bufferPointers[0] = m_vertexBuffer;
+	bufferPointers[1] = m_instanceBuffer;
+
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	deviceContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
+
+	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	return;
 }

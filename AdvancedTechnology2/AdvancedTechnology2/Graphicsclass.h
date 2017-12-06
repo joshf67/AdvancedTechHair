@@ -43,6 +43,7 @@ private:
 	D3DClass* m_D3D;
 
 	TextureShaderClass* m_TextureShader;
+	ColorShaderClass* m_colour;
 };
 
 #endif

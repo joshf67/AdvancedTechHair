@@ -5,6 +5,7 @@ struct PixelInputType
 {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
+	float4 colour : TEXCOORD2;
 };
 
 float4 TexturePixelShader(PixelInputType input) : SV_TARGET
@@ -14,9 +15,9 @@ float4 TexturePixelShader(PixelInputType input) : SV_TARGET
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
     textureColor = shaderTexture.Sample(SampleType, input.tex);
 	
-	//textureColor.x += input.strand.y; 
-	//textureColor.y += input.strand.y; 
-	//textureColor.z += input.strand.y; 
+	textureColor.x += input.colour.x; 
+	textureColor.y += input.colour.y; 
+	textureColor.z += input.colour.z; 
 	//textureColor.w = input.tex.x * input.strand;
 
     return textureColor;

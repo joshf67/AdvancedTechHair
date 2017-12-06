@@ -1,6 +1,5 @@
 #pragma once
 #include "systemclass.h"
-//#include <assimp\>
 
 SystemClass::SystemClass()
 {

@@ -56,10 +56,23 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", 10, instances);
+	result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour.png", 10, instances);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	m_colour = new ColorShaderClass;
+	if (!m_colour)
+	{
+		return false;
+	}
+
+	result = m_colour->Initialize(m_D3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the colour shader object.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -91,6 +104,14 @@ void GraphicsClass::Shutdown()
 		m_TextureShader->Shutdown();
 		delete m_TextureShader;
 		m_TextureShader = 0;
+	}
+
+	// Release the texture shader object.
+	if (m_colour)
+	{
+		m_colour->Shutdown();
+		delete m_colour;
+		m_colour = 0;
 	}
 
 	// Release the model object.
@@ -136,8 +157,8 @@ bool GraphicsClass::Frame()
 
 void GraphicsClass::CreateNewHair() {
 	m_Model->Shutdown();
-	delete m_Model;
-	m_Model = new ModelClass;
+	//delete m_Model;
+	//m_Model = new ModelClass;
 	m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances);
 }
 
@@ -170,8 +191,10 @@ bool GraphicsClass::Render()
 	m_Model->Render(m_D3D->GetDeviceContext());
 
 	// Render the model using the texture shader.
-	result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetInstanceCount(), worldMatrix, viewMatrix,
-		projectionMatrix, m_Model->GetTexture());
+	//result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetInstanceCount(), worldMatrix, viewMatrix,
+	//	projectionMatrix, m_Model->GetTexture());
+	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetInstanceCount() , worldMatrix, viewMatrix,
+		projectionMatrix);
 	if (!result)
 	{
 		return false;

@@ -78,9 +78,12 @@ void Hair::UpdateInstances() {
 
 void Hair::releaseHair() {
 	delete[] positions;
+	positions = 0;
 }
 
 void Hair::releaseInstances() {
 	delete[] instanceOffset;
+	instanceOffset = 0;
 	delete[] instancePositions;
+	instancePositions = 0;
 }
