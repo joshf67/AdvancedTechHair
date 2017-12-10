@@ -2,32 +2,29 @@
 #ifndef _HAIRCLASS_H_
 #define _HAIRCLASS_H_
 
-#include <d3d11.h>
-#include <d3dx10math.h>
-#include "textureclass.h"
+#include "modelclass.h"
 
-class Hair {
+class Hair : public ModelClass {
 
 public:
 	
-	Hair(D3DXVECTOR3 position, float length, float sections, float instances = 0, float _gravity = 0, float rigidity = 0);
+	bool Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int vertexCount, int _instances) override;
+	Hair(ID3D11Device* _device, D3DXVECTOR3 position, D3DXVECTOR4 _baseColour, float length, int sections, int instances = 0, float _gravity = 0, float rigidity = 0);
 	Hair(D3DXVECTOR3 _position, float _sections, Hair* hair1, Hair* hair2);
 	void InitiateInstances(D3DXVECTOR3 _positionMaxOffset);
 	void UpdateInstances();
-	bool Update(float windValue);
-	void Shutdown();
+	void Update(float windValue) override;
+	void ShutdownData() override;
 	void releaseInstances();
-	void releaseHair();
+	void Render(ID3D11DeviceContext*) override;
 
 	D3DXVECTOR3 startPosition;
-	D3DXVECTOR3* positions;
 	D3DXVECTOR3* instanceOffset;
-	D3DXVECTOR3* instancePositions;
-	float instances;
+	D3DXVECTOR4 baseColour;
 	float length;
-	float sections;
 	float gravity;
 	float rigidity;
+
 };
 
 #endif

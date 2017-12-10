@@ -49,14 +49,44 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, z);
 
 	// Create the model object.
-	m_Model = new ModelClass;
+	m_Model = new Hair(m_D3D->GetDevice(), D3DXVECTOR3(0, 50, 0), D3DXVECTOR4(0.2f,0.2f,0.1f,1), 0.1f, sections, instances, 0.98f, 10);
+	m_Model2 = new Bear(m_D3D->GetDevice(), D3DXVECTOR3(0, 0, -100), D3DXVECTOR4(1,1,1,1), 1);
+	m_Model3 = new ModelClass;
+	m_Model4 = new ModelClass;
 	if (!m_Model)
 	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	if (!m_Model2) {
+		MessageBox(hwnd, L"Could not initialize the model2 object.", L"Error", MB_OK);
 		return false;
 	}
 
 	// Initialize the model object.
-	result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour.png", 10, instances);
+	//result = m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(0, 50, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
+	//if (!result)
+	//{
+	//	MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+	//	return false;
+	//}
+
+	//result = m_Model2->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(-100, 50, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
+	//if (!result)
+	//{
+	//	MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+	//	return false;
+	//}
+
+	result = m_Model3->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(-100, 0, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	result = m_Model4->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(0, 0, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -122,6 +152,30 @@ void GraphicsClass::Shutdown()
 		m_Model = 0;
 	}
 
+	// Release the model object.
+	if (m_Model2)
+	{
+		m_Model2->Shutdown();
+		delete m_Model2;
+		m_Model2 = 0;
+	}
+
+	// Release the model object.
+	if (m_Model3)
+	{
+		m_Model3->Shutdown();
+		delete m_Model3;
+		m_Model3 = 0;
+	}
+
+	// Release the model object.
+	if (m_Model4)
+	{
+		m_Model4->Shutdown();
+		delete m_Model4;
+		m_Model4 = 0;
+	}
+
 	// Release the camera object.
 	if (m_Camera)
 	{
@@ -157,9 +211,17 @@ bool GraphicsClass::Frame()
 
 void GraphicsClass::CreateNewHair() {
 	m_Model->Shutdown();
+	//m_Model2->Shutdown();
+	//m_Model3->Shutdown();
+	//m_Model4->Shutdown();
 	//delete m_Model;
 	//m_Model = new ModelClass;
-	m_Model->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances);
+	m_Model->Initialize(m_D3D->GetDevice(), D3DXVECTOR3(0, 50, 0), D3DXVECTOR4(0.2f, 0.2f, 0.1f, 1), sections, instances);
+	//(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int _instances)
+	//m_Model2->Initialize(m_D3D->GetDevice(), D3DXVECTOR3(0, 0, 0), D3DXVECTOR4(0.2f, 0.2f, 0.1f, 1), 1);
+	//m_Model2->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(-100, 50, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
+	//m_Model3->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(-100, 0, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
+	//m_Model4->Initialize(m_D3D->GetDevice(), L"../AdvancedTechnology2/hairColour", sections, instances, D3DXVECTOR3(0, 0, 0), D3DXVECTOR4(0.3f, 0.3f, 0.15f, 1));
 }
 
 bool GraphicsClass::Render()
@@ -179,7 +241,10 @@ bool GraphicsClass::Render()
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
-	m_Model->Update(wind, m_D3D->GetDevice());
+	m_Model->Update(wind);
+	//m_Model2->Update(wind, m_D3D->GetDevice());
+	//m_Model3->Update(wind, m_D3D->GetDevice());
+	//m_Model4->Update(wind, m_D3D->GetDevice());
 	if (wind != 0) {
 		if (wind > 0) {
 			//wind -= 0.5f;
@@ -189,16 +254,44 @@ bool GraphicsClass::Render()
 		}
 	}
 	m_Model->Render(m_D3D->GetDeviceContext());
+	//m_Model3->Render(m_D3D->GetDeviceContext());
+	//m_Model4->Render(m_D3D->GetDeviceContext());
 
 	// Render the model using the texture shader.
 	//result = m_TextureShader->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetInstanceCount(), worldMatrix, viewMatrix,
 	//	projectionMatrix, m_Model->GetTexture());
-	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetInstanceCount() , worldMatrix, viewMatrix,
+	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model->GetVertexCount(), m_Model->GetIndexCount(), m_Model->GetInstanceCount() , 2, worldMatrix, viewMatrix,
 		projectionMatrix);
 	if (!result)
 	{
 		return false;
 	}
+
+	m_Model2->Render(m_D3D->GetDeviceContext());
+
+	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model2->GetVertexCount(), m_Model2->GetIndexCount(), m_Model2->GetInstanceCount() , 2, worldMatrix, viewMatrix,
+	projectionMatrix);
+	if (!result)
+	{
+		return false;
+	}
+
+	/*
+
+	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model3->GetIndexCount(), m_Model3->GetInstanceCount(), worldMatrix, viewMatrix,
+		projectionMatrix);
+	if (!result)
+	{
+		return false;
+	}
+
+	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model4->GetIndexCount(), m_Model4->GetInstanceCount(), worldMatrix, viewMatrix,
+		projectionMatrix);
+	if (!result)
+	{
+		return false;
+	}
+	*/
 
 	// Present the rendered scene to the screen.
 	m_D3D->EndScene();

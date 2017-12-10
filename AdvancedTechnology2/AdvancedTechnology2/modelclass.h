@@ -6,14 +6,16 @@
 #include <d3dx10math.h>
 #include "textureclass.h"
 #include "Colorshaderclass.h"
-#include "hair.h"
 
 class ModelClass
 {
-private:
+protected:
+	struct InstanceTypeColor {
+		D3DXVECTOR3 instancePosition;
+		D3DXVECTOR4 instanceColour;
+	};
 	struct InstanceType {
-		D3DXVECTOR3 position;
-		D3DXVECTOR4 colour;
+		D3DXVECTOR3 instancePosition;
 	};
 	struct VertexType
 	{
@@ -31,12 +33,16 @@ public:
 	ModelClass(const ModelClass&);
 	~ModelClass();
 
-	bool Initialize(ID3D11Device*, WCHAR*, int vertexCount, int instances);
+	virtual bool Initialize(ID3D11Device*, WCHAR*, int vertexCount, int instances, D3DXVECTOR3 position, D3DXVECTOR4 baseColour);
+	virtual bool Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int _instances);
+	virtual bool Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int vertexCount, int _instances);
 	void Shutdown();
-	void Render(ID3D11DeviceContext*);
+	virtual void ShutdownData();
+	//void Render(ID3D11DeviceContext*);
+	virtual void Render(ID3D11DeviceContext*);
 
-	void Update(float windValue, ID3D11Device* device);
-	bool generateData(ID3D11Device*, int vertexCount, int instances);
+	virtual void Update(float windValue);
+	bool generateData(ID3D11Device*, int vertexCount, int instances, D3DXVECTOR3 position, D3DXVECTOR4 baseColour);
 	float randFloat(float a, float b);
 
 	int GetVertexCount();
@@ -44,26 +50,29 @@ public:
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
 
-private:
-	bool InitializeBuffers(ID3D11Device*);
+protected:
+	bool InitializeVertexBuffer();
+	bool InitializeIndexBuffer();
+	bool InitializeInstanceBuffer();
 	void ShutdownBuffers();
-	void RenderTexture(ID3D11DeviceContext*);
-	void RenderColor(ID3D11DeviceContext*);
 
 	bool LoadTexture(ID3D11Device*, WCHAR*);
 	void ReleaseTexture();
 
-private:
+protected:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer, *m_instanceBuffer;
 	int m_vertexCount, m_indexCount, m_instanceCount;
+	D3DXVECTOR3 basePos;
 	TextureClass* m_Texture;
 	ColorShaderClass* m_colour;
 
 	VertexType* vertices;
 	VertexTypeColor* verticesColor;
 	InstanceType* instances;
+	InstanceTypeColor* instancesColor;
 	unsigned int* indices;
-	Hair *hair1;
+	ID3D11Device* device;
+	//Hair *hair1;
 };
 
 #endif

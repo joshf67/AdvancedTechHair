@@ -41,7 +41,7 @@ void ColorShaderClass::Shutdown()
 	return;
 }
 
-bool ColorShaderClass::Render(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount, D3DXMATRIX worldMatrix,
+bool ColorShaderClass::Render(ID3D11DeviceContext* deviceContext, int vertexCount, int indexCount, int instanceCount, int renderType, D3DXMATRIX worldMatrix,
 	D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix)
 {
 	bool result;
@@ -55,7 +55,7 @@ bool ColorShaderClass::Render(ID3D11DeviceContext* deviceContext, int vertexCoun
 	}
 
 	// Now render the prepared buffers with the shader.
-	RenderShader(deviceContext, vertexCount, instanceCount );
+	RenderShader(deviceContext, vertexCount, indexCount, instanceCount, renderType);
 
 	return true;
 }
@@ -158,7 +158,7 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	polygonLayout[3].SemanticIndex = 1;
 	polygonLayout[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygonLayout[3].InputSlot = 1;
-	polygonLayout[3].AlignedByteOffset = 0;
+	polygonLayout[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygonLayout[3].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 	polygonLayout[3].InstanceDataStepRate = 1;
 
@@ -307,7 +307,7 @@ bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 	return true;
 }
 
-void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int vertexCount, int instanceCount)
+void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int vertexCount, int indexCount, int instanceCount, int renderType)
 {
 	// Set the vertex input layout.
 	deviceContext->IASetInputLayout(m_layout);
@@ -316,9 +316,22 @@ void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int vert
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
-	// Render the triangle.
+	//Render the triangle.
 	//deviceContext->DrawIndexed(indexCount, 0, 0);
-	deviceContext->DrawInstanced(vertexCount, instanceCount, 0, 0);
+	//deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+	switch (renderType)
+	{
+	case 0:
+		deviceContext->DrawIndexed(indexCount, 0, 0);
+		break;
+	case 1:
+		deviceContext->DrawInstanced(vertexCount, instanceCount, 0, 0);
+		break;
+	case 2:
+		deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+		break;
+	}
+	
 
 	return;
 }

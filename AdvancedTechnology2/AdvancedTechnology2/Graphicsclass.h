@@ -5,6 +5,8 @@
 #include "d3dclass.h"
 #include "cameraclass.h"
 #include "modelclass.h"
+#include "hair.h"
+#include "bear.h"
 #include "colorshaderclass.h"
 
 #include "textureshaderclass.h"
@@ -28,11 +30,14 @@ public:
 
 	float x = 0;
 	float y = 0;
-	float z = -10;
+	float z = -300;
 	int instances = 10000;
 	int sections = 10;
 	CameraClass* m_Camera;
 	ModelClass* m_Model;
+	ModelClass* m_Model2;
+	ModelClass* m_Model3;
+	ModelClass* m_Model4;
 	float wind = 0;
 
 private:

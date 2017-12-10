@@ -21,32 +21,43 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device* device, WCHAR* textureFilename, int vertexCount, int instances)
+bool ModelClass::Initialize(ID3D11Device* _device, WCHAR* textureFilename, int vertexCount, int instances, D3DXVECTOR3 position, D3DXVECTOR4 baseColour)
 {
 	bool result;
 
-
+	device = _device;
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
-	result = generateData(device, vertexCount, instances);
+	basePos = position;
+	result = generateData(device, vertexCount, instances, position, baseColour);
 	if (!result)
 	{
 		return false;
 	}
 
-	result = InitializeBuffers(device);
+	//result = InitializeBuffers(device);
 	if (!result)
 	{
 		return false;
 	}
 
 	// Load the texture for this model.
-	result = LoadTexture(device, textureFilename);
+	//result = LoadTexture(device, textureFilename);
 	if (!result)
 	{
 		return false;
 	}
 
 	return true;
+}
+
+bool ModelClass::Initialize(ID3D11Device * _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int _instances)
+{
+	return false;
+}
+
+bool ModelClass::Initialize(ID3D11Device * _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int vertexCount, int _instances)
+{
+	return false;
 }
 
 void ModelClass::Shutdown()
@@ -59,31 +70,48 @@ void ModelClass::Shutdown()
 	ShutdownBuffers();
 
 	// Release the instance array now that the instance buffer has been created and loaded.
-	delete[] instances;
-	instances = 0;
+	if (instances) {
+		delete[] instances;
+		instances = 0;
+	}
+
+	if (instancesColor) {
+		delete[] instancesColor;
+		instancesColor = 0;
+	}
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
-	delete[] vertices;
-	vertices = 0;
+	if (vertices) {
+		delete[] vertices;
+		vertices = 0;
+	}
 	
 	// Release indices
-	delete[] indices;
-	indices = 0;
+	if (indices) {
+		delete[] indices;
+		indices = 0;
+	}
 
-	delete[] verticesColor;
-	verticesColor = 0;
+	if (verticesColor) {
+		delete[] verticesColor;
+		verticesColor = 0;
+	}
 
-	hair1->Shutdown();
-	delete hair1;
+	//hair1->Shutdown();
+	//delete hair1;
 
 	return;
+}
+
+void ModelClass::ShutdownData() {
+	//Use for data created in inheritance
 }
 
 void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 {
 	// Put the vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	//RenderTexture(deviceContext);
-	RenderColor(deviceContext);
+	//RenderColor(deviceContext);
 
 	return;
 }
@@ -109,16 +137,16 @@ ID3D11ShaderResourceView* ModelClass::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-void ModelClass::Update(float windValue, ID3D11Device* device)
+void ModelClass::Update(float windValue)
 {
 	//D3D11_MAPPED_SUBRESOURCE mappedResource;
 	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
 	ShutdownBuffers();
 
-	hair1->Update(windValue);
+	//hair1->Update(windValue);
 
-	if (hair1->sections > 0) {
+	/*if (hair1->sections > 0) {
 		for (int a = 0; a < m_vertexCount; a += 2) {
 			if (a == 0) {
 				verticesColor[0].position = hair1->positions[0];
@@ -132,14 +160,14 @@ void ModelClass::Update(float windValue, ID3D11Device* device)
 
 		hair1->UpdateInstances();
 		for (int a = 0; a < m_instanceCount; a++) {
-			instances[a].position = hair1->instancePositions[a];
+			instances[a].instancePosition = hair1->instancePositions[a];
 		}
-	}
+	}*/
 
-	InitializeBuffers(device);
+	//InitializeBuffers(device);
 }
 
-bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount) {
+bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount, D3DXVECTOR3 position, D3DXVECTOR4 baseColour) {
 
 	// Set the number of vertices in the vertex array.
 	m_vertexCount = vertexCount;
@@ -156,30 +184,28 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 	}
 
 	// Create the instance array
-	instances = new InstanceType[m_instanceCount];
-	if (!instances)
+	instancesColor = new InstanceTypeColor[m_instanceCount];
+	if (!instancesColor)
 	{
 		return false;
 	}
 
-	hair1 = new Hair(D3DXVECTOR3(0, 0, 100), 0.1f, vertexCount, instanceCount, 0.98f, 10);
-	hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
+	//hair1 = new Hair(position, 0.1f, vertexCount, instanceCount, 0.98f, 10);
+	//hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
+	/*
 	Update(0, device);
 
-	D3DXVECTOR4 baseColour = D3DXVECTOR4(0.5f,0.5f,0.2f, 1);
 	D3DXVECTOR4 randColour;
-	randColour = D3DXVECTOR4(randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), 0); //<------- Doesn't add colors???
-	randColour = D3DXVECTOR4(0.5f, 0.5f, 0.2f, 1);
+	randColour = D3DXVECTOR4(randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.2f, -0.1f));
 	for (int a = 0; a < m_vertexCount; a += 2) {
 		verticesColor[a].colour = baseColour + randColour;
 		verticesColor[a + 1].colour = baseColour + randColour;
 	}
 
 	for (int a = 0; a < instanceCount; a++) {
-		randColour = D3DXVECTOR4(randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), randFloat(-0.3f, 0.3f), 0);
-		randColour = D3DXVECTOR4(0.5f, 0.5f, 0.2f, 1);
-		instances[a].colour = baseColour + randColour;
-		instances[a].position = hair1->instancePositions[a];
+		randColour = D3DXVECTOR4(randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.2f, -0.1f));
+		instances[a].instanceColour = baseColour + randColour;
+		instances[a].instancePosition = hair1->instancePositions[a];
 	}
 
 	m_indexCount = (m_vertexCount - 1) * 2;
@@ -193,6 +219,7 @@ bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanc
 		indices[a] = a;
 		indices[a + 1] = a + 1;
 	}
+	*/
 
 
 	return true;
@@ -224,18 +251,11 @@ bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
 	return true;
 }
 
-bool ModelClass::InitializeBuffers(ID3D11Device* device)
-{
-
-	D3D11_BUFFER_DESC vertexBufferDesc, instanceBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, instanceData, indexData;
+bool ModelClass::InitializeVertexBuffer() {
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData;
 	HRESULT result;
 
-
-	srand((unsigned)time(NULL));
-
-
-	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	if (vertices) {
 		vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
@@ -264,27 +284,14 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 		return false;
 	}
 
-	if (m_instanceCount != 0) {
-		// Set up the description of the instance buffer.
-		instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-		instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
-		instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		instanceBufferDesc.MiscFlags = 0;
-		instanceBufferDesc.StructureByteStride = 0;
+	return true;
 
-		// Give the subresource structure a pointer to the instance data.
-		instanceData.pSysMem = instances;
-		instanceData.SysMemPitch = 0;
-		instanceData.SysMemSlicePitch = 0;
+}
 
-		// Create the instance buffer.
-		result = device->CreateBuffer(&instanceBufferDesc, &instanceData, &m_instanceBuffer);
-		if (FAILED(result))
-		{
-			return false;
-		}
-	}
+bool ModelClass::InitializeIndexBuffer() {
+	D3D11_BUFFER_DESC indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA indexData;
+	HRESULT result;
 
 	// Set up the description of the static index buffer.
 	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -301,6 +308,44 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 	// Create the index buffer.
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	return true;
+
+}
+
+bool ModelClass::InitializeInstanceBuffer() {
+	D3D11_BUFFER_DESC instanceBufferDesc;
+	D3D11_SUBRESOURCE_DATA instanceData;
+	HRESULT result;
+
+	// Set up the description of the instance buffer.
+	instanceBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	if (instances) {
+		instanceBufferDesc.ByteWidth = sizeof(InstanceType) * m_instanceCount;
+		instanceData.pSysMem = instances;
+	}
+	else if (instancesColor) {
+		instanceBufferDesc.ByteWidth = sizeof(InstanceTypeColor) * m_instanceCount;
+		instanceData.pSysMem = instancesColor;
+	}
+	else {
+		return false;
+	}
+	instanceBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	instanceBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	instanceBufferDesc.MiscFlags = 0;
+	instanceBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the instance data.
+	instanceData.SysMemPitch = 0;
+	instanceData.SysMemSlicePitch = 0;
+
+	// Create the instance buffer.
+	result = device->CreateBuffer(&instanceBufferDesc, &instanceData, &m_instanceBuffer);
 	if (FAILED(result))
 	{
 		return false;
@@ -335,6 +380,7 @@ void ModelClass::ShutdownBuffers()
 	return;
 }
 
+/*
 void ModelClass::RenderTexture(ID3D11DeviceContext* deviceContext)
 {
 	unsigned int strides[2];
@@ -367,24 +413,6 @@ void ModelClass::RenderTexture(ID3D11DeviceContext* deviceContext)
 void ModelClass::RenderColor(ID3D11DeviceContext* deviceContext)
 {
 
-	/*
-	unsigned int stride;
-	unsigned int offset;
-
-	// Set vertex buffer stride and offset.
-	stride = sizeof(VertexTypeColor);
-	offset = 0;
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
-
-	// Set the index buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	*/
-
 	unsigned int strides[2];
 	unsigned int offsets[2];
 	ID3D11Buffer* bufferPointers[2];
@@ -392,7 +420,7 @@ void ModelClass::RenderColor(ID3D11DeviceContext* deviceContext)
 
 	// Set the buffer strides.
 	strides[0] = sizeof(VertexTypeColor);
-	strides[1] = sizeof(InstanceType);
+	strides[1] = sizeof(InstanceTypeColor);
 
 	// Set the buffer offsets.
 	offsets[0] = 0;
@@ -410,6 +438,7 @@ void ModelClass::RenderColor(ID3D11DeviceContext* deviceContext)
 
 	return;
 }
+*/
 
 void ModelClass::ReleaseTexture()
 {
