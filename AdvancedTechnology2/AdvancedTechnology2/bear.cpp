@@ -111,7 +111,7 @@ Bear::Bear(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour
 	verticesColor = new VertexTypeColor[m_vertexCount];
 
 	for (int a = 0; a < m_vertexCount; a++) {
-		verticesColor[a].position = startPosition + D3DXVECTOR3(scene->mMeshes[0]->mVertices[a].x, scene->mMeshes[0]->mVertices[a].y, scene->mMeshes[0]->mVertices[a].z);
+		verticesColor[a].position = D3DXVECTOR3(scene->mMeshes[0]->mVertices[a].x, scene->mMeshes[0]->mVertices[a].y, scene->mMeshes[0]->mVertices[a].z);
 		verticesColor[a].colour = _baseColour + D3DXVECTOR4(randFloat(-1, 0), randFloat(-1, 0), randFloat(-1, 0), randFloat(-1, 0));
 	}
 
