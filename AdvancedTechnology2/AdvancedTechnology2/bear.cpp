@@ -36,6 +36,35 @@ bool Bear::Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 
 
 	device = _device;
 
+	//index setup for wireframe
+	/*
+	m_indexCount = scene->mMeshes[0]->mNumFaces * 6;
+
+	indices = new unsigned int[m_indexCount];
+
+	for (int a = 0; a < m_indexCount / 6; a++) {
+	for (int b = 0; b < 3; b++) {
+	for (int c = 0; c < 2; c++) {
+	if (b != 2) {
+	indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[b + c];
+	}
+	else {
+	if (c == 1) {
+	indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[0];
+	}
+	else {
+	indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
+	}
+	}
+	}
+	//indices[((a * 3) + b)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
+	}
+	}
+	*/
+
+
+	//index setup for model
+
 	m_indexCount = scene->mMeshes[0]->mNumFaces * 3;
 
 	indices = new unsigned int[m_indexCount];
@@ -45,6 +74,7 @@ bool Bear::Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 
 			indices[((a * 3) + b)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
 		}
 	}
+
 
 	InitiateInstances(D3DXVECTOR3(50, 50, 50));
 
@@ -82,9 +112,38 @@ Bear::Bear(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour
 
 	for (int a = 0; a < m_vertexCount; a++) {
 		verticesColor[a].position = startPosition + D3DXVECTOR3(scene->mMeshes[0]->mVertices[a].x, scene->mMeshes[0]->mVertices[a].y, scene->mMeshes[0]->mVertices[a].z);
-		verticesColor[a].colour = _baseColour;
+		verticesColor[a].colour = _baseColour + D3DXVECTOR4(randFloat(-1, 0), randFloat(-1, 0), randFloat(-1, 0), randFloat(-1, 0));
 	}
 
+	//index setup for wireframe
+	/*
+	m_indexCount = scene->mMeshes[0]->mNumFaces * 6;
+
+	indices = new unsigned int[m_indexCount];
+
+	for (int a = 0; a < m_indexCount / 6; a++) {
+		for (int b = 0; b < 3; b++) {
+			for (int c = 0; c < 2; c++) {
+				if (b != 2) {
+					indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[b + c];
+				}
+				else {
+					if (c == 1) {
+						indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[0];
+					}
+					else {
+						indices[((a * 3) + (b * 2) + c)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
+					}
+				}
+			}
+			//indices[((a * 3) + b)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
+		}
+	}
+	*/
+
+
+	//index setup for model
+	
 	m_indexCount = scene->mMeshes[0]->mNumFaces * 3;
 
 	indices = new unsigned int[m_indexCount];
@@ -93,6 +152,21 @@ Bear::Bear(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour
 		for (int b = 0; b < 3; b++) {
 			indices[((a * 3) + b)] = scene->mMeshes[0]->mFaces[a].mIndices[b];
 		}
+	}
+	
+
+	//manual square tesselation test
+	m_hairCount = scene->mMeshes[0]->mNumFaces;
+	hairs = new hairStruct[m_hairCount];
+
+	for (int a = 0; a < scene->mMeshes[0]->mNumFaces; a++) {
+		//D3DXVECTOR3 midPos = verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[0]].position - (verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[0]].position - verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[1]].position) / 2;
+		//D3DXVECTOR3 midPos2 = ((midPos - verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[2]].position) / 2);
+		D3DXVECTOR3 midPos = verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[0]].position;
+		//D3DXVECTOR3 midPos = startPos - ((startPos - verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[1]].position) / 2);
+		//D3DXVECTOR3 endPos = midPos - ((midPos - verticesColor[scene->mMeshes[0]->mFaces[a].mIndices[2]].position) / 2);
+
+		hairs[a].hair = new Hair(_device, midPos, _baseColour, 0.1f, 10, 1, 0.98, 10);
 	}
 
 	device = _device;
@@ -120,14 +194,12 @@ void Bear::Update(float windValue) {
 void Bear::InitiateInstances(D3DXVECTOR3 _positionMaxOffset) {
 	instancesColor = new InstanceTypeColor[m_instanceCount];
 	instanceOffset = new D3DXVECTOR3[m_instanceCount];
-	if (m_instanceCount != 1) {
-		for (int a = 0; a < m_instanceCount; a++) {
+	for (int a = 0; a < m_instanceCount; a++) {
+		if (m_instanceCount != 1) {
 			instanceOffset[a] = D3DXVECTOR3(randFloat(-_positionMaxOffset.x, _positionMaxOffset.x), randFloat(-_positionMaxOffset.y, _positionMaxOffset.y), randFloat(-_positionMaxOffset.z, _positionMaxOffset.z));
 		}
-	}
-	else {
-		if (m_instanceCount != 0) {
-			instanceOffset[0] = D3DXVECTOR3(0,0,0);
+		else {
+			instanceOffset[0] = D3DXVECTOR3(0, 0, 0);
 		}
 	}
 	UpdateInstances();
@@ -180,6 +252,18 @@ void Bear::Render(ID3D11DeviceContext* deviceContext)
 
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	return;
 }
+
+void Bear::regenHair(D3DXVECTOR4 _baseColour, int vertexCount)
+{
+	for (int a = 0; a < m_hairCount; a++) {
+		hairs[a].hair->Shutdown();
+		hairs[a].hair->Initialize(device, hairs[a].hair->startPosition, _baseColour, vertexCount, 1);
+		hairs[a].hair->m_instanceCount = 50;
+		hairs[a].hair->InitiateInstances(D3DXVECTOR3(3,3,3));
+	}
+}
+

@@ -9,6 +9,7 @@ class Hair : public ModelClass {
 public:
 	
 	bool Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, int vertexCount, int _instances) override;
+	Hair();
 	Hair(ID3D11Device* _device, D3DXVECTOR3 position, D3DXVECTOR4 _baseColour, float length, int sections, int instances = 0, float _gravity = 0, float rigidity = 0);
 	Hair(D3DXVECTOR3 _position, float _sections, Hair* hair1, Hair* hair2);
 	void InitiateInstances(D3DXVECTOR3 _positionMaxOffset);

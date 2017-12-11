@@ -27,6 +27,20 @@ bool Hair::Initialize(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 
 	return true;
 }
 
+Hair::Hair() {
+	startPosition = D3DXVECTOR3(0, 0, 0);
+	baseColour = D3DXVECTOR4(0, 0, 0, 0);
+	m_instanceCount = 0;
+	m_vertexCount = 0;
+	m_indexCount = 0;
+	indices = 0;
+	vertices = 0;
+	verticesColor = 0;
+	instancesColor = 0;
+	instances = 0;
+	device = 0;
+}
+
 Hair::Hair(ID3D11Device* _device, D3DXVECTOR3 _position, D3DXVECTOR4 _baseColour, float _length, int _sections, int _instances, float _gravity, float _rigidity) {
 	startPosition = _position;
 	baseColour = _baseColour;
@@ -75,13 +89,13 @@ void Hair::Update(float windValue) {
 	for (int a = 0; a < m_vertexCount; a++) {
 		D3DXVECTOR3 position(0, 0, 0);
 		D3DXVECTOR3 effect(0, 0, 0);
-		effect.x = length;
+		effect.y = length;
 		effect.x += windValue;
 		if (rigidity != 0) {
-			effect.y = -gravity * (1 - (rigidity / 100)) * a;
+			effect.z = -gravity * (1 - (rigidity / 100)) * a;
 		}
 		else {
-			effect.y = -gravity * a;
+			effect.z = -gravity * a;
 		}
 		D3DXVec3Normalize(&effect, &effect);
 		effect *= length;
@@ -105,8 +119,14 @@ void Hair::InitiateInstances(D3DXVECTOR3 _positionMaxOffset) {
 	instancesColor = new InstanceTypeColor[m_instanceCount];
 	instanceOffset = new D3DXVECTOR3[m_instanceCount];
 	for (int a = 0; a < m_instanceCount; a++) {
-		instanceOffset[a] = D3DXVECTOR3(randFloat(-_positionMaxOffset.x, _positionMaxOffset.x), randFloat(-_positionMaxOffset.y, _positionMaxOffset.y), randFloat(-_positionMaxOffset.z, _positionMaxOffset.z));
+		if (m_instanceCount != 1) {
+			instanceOffset[a] = D3DXVECTOR3(randFloat(-_positionMaxOffset.x, _positionMaxOffset.x), randFloat(-_positionMaxOffset.y, _positionMaxOffset.y), randFloat(-_positionMaxOffset.z, _positionMaxOffset.z));
+		}
+		else {
+			instanceOffset[0] = D3DXVECTOR3(0, 0, 0);
+		}
 	}
+	UpdateInstances();
 }
 
 void Hair::UpdateInstances() {

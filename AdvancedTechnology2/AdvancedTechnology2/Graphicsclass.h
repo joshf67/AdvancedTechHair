@@ -28,9 +28,12 @@ public:
 	bool Frame();
 	void CreateNewHair();
 
-	float x = 0;
-	float y = 0;
-	float z = -300;
+	float x = 15;
+	float y = 90;
+	float z = -200;
+	float Rotx = 90;
+	float Roty = 0;
+	float Rotz = 0;
 	int instances = 10000;
 	int sections = 10;
 	CameraClass* m_Camera;

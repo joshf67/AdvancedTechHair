@@ -9,7 +9,7 @@
 
 class ModelClass
 {
-protected:
+public:
 	struct InstanceTypeColor {
 		D3DXVECTOR3 instancePosition;
 		D3DXVECTOR4 instanceColour;
@@ -28,7 +28,6 @@ protected:
 		D3DXVECTOR4 colour;
 	};
 
-public:
 	ModelClass();
 	ModelClass(const ModelClass&);
 	~ModelClass();
@@ -50,7 +49,6 @@ public:
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
 
-protected:
 	bool InitializeVertexBuffer();
 	bool InitializeIndexBuffer();
 	bool InitializeInstanceBuffer();
@@ -59,7 +57,6 @@ protected:
 	bool LoadTexture(ID3D11Device*, WCHAR*);
 	void ReleaseTexture();
 
-protected:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer, *m_instanceBuffer;
 	int m_vertexCount, m_indexCount, m_instanceCount;
 	D3DXVECTOR3 basePos;

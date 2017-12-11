@@ -3,6 +3,7 @@
 #define _BEARCLASS_H_
 
 #include "modelclass.h"
+#include "hair.h"
 
 class Bear : public ModelClass {
 
@@ -16,10 +17,18 @@ public:
 	void ShutdownData() override;
 	void releaseInstances();
 	void Render(ID3D11DeviceContext*) override;
+	void regenHair(D3DXVECTOR4 _baseColour, int vertexCount);
+
+	struct hairStruct
+	{
+		Hair* hair;
+	};
 
 	D3DXVECTOR3 startPosition;
 	D3DXVECTOR3* instanceOffset;
 	D3DXVECTOR4 baseColour;
+	int m_hairCount;
+	hairStruct* hairs;
 
 };
 

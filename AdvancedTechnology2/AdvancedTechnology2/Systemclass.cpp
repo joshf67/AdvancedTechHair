@@ -160,6 +160,48 @@ bool SystemClass::Frame()
 	}
 
 	//move camera
+	if (m_Input->IsKeyDown(87))
+	{
+		m_Graphics->y += 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(83))
+	{
+		m_Graphics->y -= 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(81))
+	{
+		m_Graphics->z += 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(69))
+	{
+		m_Graphics->z -= 0.1f;
+		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(82))
+	{
+		m_Graphics->Rotx += 1;
+		m_Graphics->m_Camera->SetRotation(m_Graphics->Rotx, m_Graphics->Roty, m_Graphics->Rotz);
+	}
+
+	//move camera
+	if (m_Input->IsKeyDown(70))
+	{
+		m_Graphics->Rotx -= 1;
+		m_Graphics->m_Camera->SetRotation(m_Graphics->Rotx, m_Graphics->Roty, m_Graphics->Rotz);
+	}
+
+	//move camera
 	if (m_Input->IsKeyDown(VK_DOWN) && m_Graphics->sections > 2)
 	{
 		//m_Graphics->y -= 0.1f;
