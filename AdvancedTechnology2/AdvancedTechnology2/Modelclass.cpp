@@ -28,24 +28,6 @@ bool ModelClass::Initialize(ID3D11Device* _device, WCHAR* textureFilename, int v
 	device = _device;
 	// Initialize the vertex and index buffer that hold the geometry for the triangle.
 	basePos = position;
-	result = generateData(device, vertexCount, instances, position, baseColour);
-	if (!result)
-	{
-		return false;
-	}
-
-	//result = InitializeBuffers(device);
-	if (!result)
-	{
-		return false;
-	}
-
-	// Load the texture for this model.
-	//result = LoadTexture(device, textureFilename);
-	if (!result)
-	{
-		return false;
-	}
 
 	return true;
 }
@@ -137,94 +119,9 @@ ID3D11ShaderResourceView* ModelClass::GetTexture()
 	return m_Texture->GetTexture();
 }
 
-void ModelClass::Update(float windValue)
-{
-	//D3D11_MAPPED_SUBRESOURCE mappedResource;
-	//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+void ModelClass::Update(float windValue) {}
 
-	ShutdownBuffers();
-
-	//hair1->Update(windValue);
-
-	/*if (hair1->sections > 0) {
-		for (int a = 0; a < m_vertexCount; a += 2) {
-			if (a == 0) {
-				verticesColor[0].position = hair1->positions[0];
-				verticesColor[1].position = hair1->positions[1];
-			}
-			else {
-				verticesColor[a].position = hair1->positions[a - 1];
-				verticesColor[a + 1].position = hair1->positions[a + 1];
-			}
-		}
-
-		hair1->UpdateInstances();
-		for (int a = 0; a < m_instanceCount; a++) {
-			instances[a].instancePosition = hair1->instancePositions[a];
-		}
-	}*/
-
-	//InitializeBuffers(device);
-}
-
-bool ModelClass::generateData(ID3D11Device* device, int vertexCount, int instanceCount, D3DXVECTOR3 position, D3DXVECTOR4 baseColour) {
-
-	// Set the number of vertices in the vertex array.
-	m_vertexCount = vertexCount;
-
-	// Set the number of instanced in the instance array;
-	//m_instanceCount = RAND_MAX;
-	m_instanceCount = instanceCount;
-
-	// Create the vertex array.
-	verticesColor = new VertexTypeColor[m_vertexCount];
-	if (!verticesColor)
-	{
-		return false;
-	}
-
-	// Create the instance array
-	instancesColor = new InstanceTypeColor[m_instanceCount];
-	if (!instancesColor)
-	{
-		return false;
-	}
-
-	//hair1 = new Hair(position, 0.1f, vertexCount, instanceCount, 0.98f, 10);
-	//hair1->InitiateInstances(D3DXVECTOR3(50, 50, 50));
-	/*
-	Update(0, device);
-
-	D3DXVECTOR4 randColour;
-	randColour = D3DXVECTOR4(randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.2f, -0.1f));
-	for (int a = 0; a < m_vertexCount; a += 2) {
-		verticesColor[a].colour = baseColour + randColour;
-		verticesColor[a + 1].colour = baseColour + randColour;
-	}
-
-	for (int a = 0; a < instanceCount; a++) {
-		randColour = D3DXVECTOR4(randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.1f, 0.1f), randFloat(-0.2f, -0.1f));
-		instances[a].instanceColour = baseColour + randColour;
-		instances[a].instancePosition = hair1->instancePositions[a];
-	}
-
-	m_indexCount = (m_vertexCount - 1) * 2;
-	indices = new unsigned int[m_indexCount];
-	if (!indices)
-	{
-		return false;
-	}
-
-	for (int a = 0; a < m_indexCount; a += 2) {
-		indices[a] = a;
-		indices[a + 1] = a + 1;
-	}
-	*/
-
-
-	return true;
-}
-
+//return a random float between a -> b 
 float ModelClass::randFloat(float a, float b) {
 	return ((b - a) *  ((float)rand() / RAND_MAX)) + a;
 }
@@ -379,66 +276,6 @@ void ModelClass::ShutdownBuffers()
 
 	return;
 }
-
-/*
-void ModelClass::RenderTexture(ID3D11DeviceContext* deviceContext)
-{
-	unsigned int strides[2];
-	unsigned int offsets[2];
-	ID3D11Buffer* bufferPointers[2];
-
-
-	// Set the buffer strides.
-	strides[0] = sizeof(VertexType);
-	strides[1] = sizeof(InstanceType);
-
-	// Set the buffer offsets.
-	offsets[0] = 0;
-	offsets[1] = 0;
-
-	// Set the array of pointers to the vertex and instance buffers.
-	bufferPointers[0] = m_vertexBuffer;
-	bufferPointers[1] = m_instanceBuffer;
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-	//deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
-}
-
-void ModelClass::RenderColor(ID3D11DeviceContext* deviceContext)
-{
-
-	unsigned int strides[2];
-	unsigned int offsets[2];
-	ID3D11Buffer* bufferPointers[2];
-
-
-	// Set the buffer strides.
-	strides[0] = sizeof(VertexTypeColor);
-	strides[1] = sizeof(InstanceTypeColor);
-
-	// Set the buffer offsets.
-	offsets[0] = 0;
-	offsets[1] = 0;
-
-	// Set the array of pointers to the vertex and instance buffers.
-	bufferPointers[0] = m_vertexBuffer;
-	bufferPointers[1] = m_instanceBuffer;
-
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	deviceContext->IASetVertexBuffers(0, 2, bufferPointers, strides, offsets);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-
-	return;
-}
-*/
 
 void ModelClass::ReleaseTexture()
 {

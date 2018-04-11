@@ -49,9 +49,13 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(x, y, z);
 	m_Camera->SetRotation(Rotx, Roty, Rotz);
 
-	// Create the model object.
+	//create the floating hair object
 	m_Model = new Hair(m_D3D->GetDevice(), D3DXVECTOR3(0, 50, 0), D3DXVECTOR4(0.2f,0.2f,0.1f,1), 0.1f, sections, instances, 0.98f, 10);
+
+	//create the model object for the bear
 	m_Model2 = new Bear(m_D3D->GetDevice(), D3DXVECTOR3(0, 0, -100), D3DXVECTOR4(1,1,1,1), 1);
+
+	//do checks to see if the object could be initialized
 	if (!m_Model)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -62,6 +66,9 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		MessageBox(hwnd, L"Could not initialize the model2 object.", L"Error", MB_OK);
 		return false;
 	}
+
+	//setup the base hair
+	CreateNewHair();
 
 	m_colour = new ColorShaderClass;
 	if (!m_colour)
@@ -164,8 +171,11 @@ bool GraphicsClass::Frame()
 }
 
 void GraphicsClass::CreateNewHair() {
+	//shutdown hair wall and recreate it
 	m_Model->Shutdown();
-	m_Model->Initialize(m_D3D->GetDevice(), D3DXVECTOR3(0, 50, 0), D3DXVECTOR4(0.2f, 0.2f, 0.1f, 1), sections, instances);
+	m_Model->Initialize(m_D3D->GetDevice(), D3DXVECTOR3(0, 100, 0), D3DXVECTOR4(0.2f, 0.2f, 0.1f, 1), sections, instances);
+
+	//regenerate bear hair
 	((Bear*)m_Model2)->regenHair(D3DXVECTOR4(0.2f, 0.2f, 0.1f, 1), sections);
 }
 
@@ -216,10 +226,13 @@ bool GraphicsClass::Render()
 		return false;
 	}
 
+	//loop through every hair on the bear
 	for (int a = 0; a < ((Bear*)m_Model2)->m_hairCount; a++) {
+		//update the hair section and render the hair
 		((Bear*)m_Model2)->hairs[a].hair->Update(wind);
 		((Bear*)m_Model2)->hairs[a].hair->Render(m_D3D->GetDeviceContext());
 
+		//draw the above hair
 		result = m_colour->Render(m_D3D->GetDeviceContext(), ((Bear*)m_Model2)->hairs[a].hair->GetVertexCount(), ((Bear*)m_Model2)->hairs[a].hair->GetIndexCount(), ((Bear*)m_Model2)->hairs[a].hair->GetInstanceCount(), 2, worldMatrix, viewMatrix,
 			projectionMatrix);
 		if (!result)
@@ -227,23 +240,6 @@ bool GraphicsClass::Render()
 			return false;
 		}
 	}
-
-	/*
-
-	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model3->GetIndexCount(), m_Model3->GetInstanceCount(), worldMatrix, viewMatrix,
-		projectionMatrix);
-	if (!result)
-	{
-		return false;
-	}
-
-	result = m_colour->Render(m_D3D->GetDeviceContext(), m_Model4->GetIndexCount(), m_Model4->GetInstanceCount(), worldMatrix, viewMatrix,
-		projectionMatrix);
-	if (!result)
-	{
-		return false;
-	}
-	*/
 
 	// Present the rendered scene to the screen.
 	m_D3D->EndScene();

@@ -129,117 +129,127 @@ bool SystemClass::Frame()
 		return false;
 	}
 
-	//move camera
+	//Apply global force "wind" to the left
 	if (m_Input->IsKeyDown(VK_LEFT))
 	{
-		//m_Graphics->x -= 0.1f;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->wind -= 1;
 	}
 
-	//move camera
+	//Apply global force "wind" to the right
 	if (m_Input->IsKeyDown(VK_RIGHT))
 	{
-		//m_Graphics->x += 0.1f;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->wind += 1;
 	}
 
-	//move camera
+	//move camera negetive on x
 	if (m_Input->IsKeyDown(65))
 	{
 		m_Graphics->x -= 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 	}
 
-	//move camera
+	//move camera positive on x
 	if (m_Input->IsKeyDown(68))
 	{
 		m_Graphics->x += 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 	}
 
-	//move camera
+	//move camera positive on y
 	if (m_Input->IsKeyDown(87))
 	{
-		m_Graphics->y += 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->z += 0.1f;
 	}
 
-	//move camera
+	//move camera negetive on y
 	if (m_Input->IsKeyDown(83))
 	{
-		m_Graphics->y -= 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->z -= 0.1f;
 	}
 
-	//move camera
+	//move camera positive on z
 	if (m_Input->IsKeyDown(81))
 	{
-		m_Graphics->z += 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+
+		m_Graphics->y += 0.1f;
 	}
 
-	//move camera
+	//move camera negetive on z
 	if (m_Input->IsKeyDown(69))
 	{
-		m_Graphics->z -= 0.1f;
-		m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
+		m_Graphics->y -= 0.1f;
 	}
 
-	//move camera
+	//rotate camera rotation negative on x
 	if (m_Input->IsKeyDown(82))
 	{
-		m_Graphics->Rotx += 1;
-		m_Graphics->m_Camera->SetRotation(m_Graphics->Rotx, m_Graphics->Roty, m_Graphics->Rotz);
+		m_Graphics->Rotx -= 1;
 	}
 
-	//move camera
+	//rotate camera rotation positive on x
 	if (m_Input->IsKeyDown(70))
 	{
-		m_Graphics->Rotx -= 1;
-		m_Graphics->m_Camera->SetRotation(m_Graphics->Rotx, m_Graphics->Roty, m_Graphics->Rotz);
+		m_Graphics->Rotx += 1;
 	}
 
-	//move camera
+	//rotate camera rotation positive on y
+	if (m_Input->IsKeyDown(90))
+	{
+		m_Graphics->Roty += 1;
+	}
+
+	//rotate camera rotation negative on y
+	if (m_Input->IsKeyDown(88))
+	{
+		m_Graphics->Roty -= 1;
+	}
+
+	//rotate camera rotation positive on z
+	if (m_Input->IsKeyDown(67))
+	{
+		m_Graphics->Rotz += 1;
+	}
+
+	//rotate camera rotation negative on z
+	if (m_Input->IsKeyDown(86))
+	{
+		m_Graphics->Rotz -= 1;
+	}
+
+	//create new hair with less sections
 	if (m_Input->IsKeyDown(VK_DOWN) && m_Graphics->sections > 2)
 	{
-		//m_Graphics->y -= 0.1f;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->sections-= 2;
 		m_Graphics->CreateNewHair();
 	}
 
-	//move camera
+	//create new hair with more sections
 	if (m_Input->IsKeyDown(VK_UP))
 	{
-		//m_Graphics->y += 0.1f;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->sections+= 2;
 		m_Graphics->CreateNewHair();
 	}
 
-	//move camera
+	//create new hair with more instances
 	if (m_Input->IsKeyDown(VK_OEM_PLUS))
 	{
-		//m_Graphics->z -= 1;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->instances += 10;
 		m_Graphics->CreateNewHair();
 	}
 
-	//move camera
+	//create new hair with less instances
 	if (m_Input->IsKeyDown(VK_OEM_MINUS) && m_Graphics->instances > 10)
 	{
-		//m_Graphics->z += 1;
-		//m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 		m_Graphics->instances -= 10;
 		m_Graphics->CreateNewHair();
 	}
 
+	//create new hair
 	if (m_Input->IsKeyDown(VK_RETURN)) {
 		m_Graphics->CreateNewHair();
 	}
+
+	//set camera position and rotation to new pos and rot
+	m_Graphics->m_Camera->SetRotation(m_Graphics->Rotx, m_Graphics->Roty, m_Graphics->Rotz);
+	m_Graphics->m_Camera->SetPosition(m_Graphics->x, m_Graphics->y, m_Graphics->z);
 
 	// Do the frame processing for the graphics object.
 	result = m_Graphics->Frame();
@@ -255,7 +265,7 @@ LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam
 {
 	switch (umsg)
 	{
-			// Check if a key has been pressed on the keyboard.
+		// Check if a key has been pressed on the keyboard.
 		case WM_KEYDOWN:
 		{
 			// If a key is pressed send it to the input object so it can record that state.
@@ -338,8 +348,8 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	else
 	{
 		// If windowed then set it to 800x600 resolution.
-		screenWidth = 800;
-		screenHeight = 600;
+		screenWidth = 1024;
+		screenHeight = 720;
 
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;

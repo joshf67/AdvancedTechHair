@@ -19,11 +19,13 @@ public:
 	void Render(ID3D11DeviceContext*) override;
 	void regenHair(D3DXVECTOR4 _baseColour, int vertexCount);
 
+	//hold pointer to hair and any other info if needed
 	struct hairStruct
 	{
 		Hair* hair;
 	};
 
+	//basic variables for hair
 	D3DXVECTOR3 startPosition;
 	D3DXVECTOR3* instanceOffset;
 	D3DXVECTOR4 baseColour;

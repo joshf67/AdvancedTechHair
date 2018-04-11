@@ -41,7 +41,6 @@ public:
 	virtual void Render(ID3D11DeviceContext*);
 
 	virtual void Update(float windValue);
-	bool generateData(ID3D11Device*, int vertexCount, int instances, D3DXVECTOR3 position, D3DXVECTOR4 baseColour);
 	float randFloat(float a, float b);
 
 	int GetVertexCount();
@@ -69,7 +68,6 @@ public:
 	InstanceTypeColor* instancesColor;
 	unsigned int* indices;
 	ID3D11Device* device;
-	//Hair *hair1;
 };
 
 #endif

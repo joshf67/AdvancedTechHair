@@ -28,20 +28,24 @@ public:
 	bool Frame();
 	void CreateNewHair();
 
-	float x = 15;
-	float y = 90;
-	float z = -200;
+	//camera settings
+	float x = 17;
+	float y = 84;
+	float z = 9;
 	float Rotx = 90;
 	float Roty = 0;
 	float Rotz = 0;
-	int instances = 10000;
-	int sections = 10;
 	CameraClass* m_Camera;
+
+	//copies of hair, how many sections, global force "wind"
+	int instances = 10000;
+	int sections = 30;
+	float wind = -5;
+
+	//model class to store bear and hair
 	ModelClass* m_Model;
 	ModelClass* m_Model2;
-	ModelClass* m_Model3;
-	ModelClass* m_Model4;
-	float wind = 0;
+
 
 private:
 	bool Render();

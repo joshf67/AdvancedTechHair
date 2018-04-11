@@ -19,9 +19,16 @@ public:
 	void releaseInstances();
 	void Render(ID3D11DeviceContext*) override;
 
+	//store the original hair strand's position
 	D3DXVECTOR3 startPosition;
+	
+	//store all of the positions of all instances
 	D3DXVECTOR3* instanceOffset;
+
+	//store the colour of the original hair strand
 	D3DXVECTOR4 baseColour;
+
+	//store the length, gravity and rigidity of the original hair strand
 	float length;
 	float gravity;
 	float rigidity;
